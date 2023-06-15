@@ -1,0 +1,2 @@
+#include "automato.hpp"
+
