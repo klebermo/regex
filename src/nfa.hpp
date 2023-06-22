@@ -4,10 +4,6 @@
 #include "automato.hpp"
 
 class NFA : public Automato {
-private:
-    std::unordered_map<std::pair<int, char>, std::unordered_set<int>, pair_hash> transitions;
-    int startState;
-    std::unordered_set<int> acceptStates;
 public:
     NFA(SyntaxTree& syntaxTree);
     ~NFA();

@@ -10,7 +10,7 @@ NFA::~NFA() {
 }
 
 void NFA::addTransition(int currentState, char symbol, int nextState) {
-    transitions[std::make_pair(currentState, symbol)].insert(nextState);
+    transitions[std::make_pair(currentState, symbol)] = nextState;
 }
 
 void NFA::setStartState(int state) {
@@ -34,8 +34,11 @@ std::vector<int> NFA::getNextState(int currentState, char symbol) {
     auto transition = std::make_pair(currentState, symbol);
 
     if(transitions.count(transition) > 0) {
-        for(int nextState : transitions[transition]) {
+        /*for(int nextState : transitions[transition]) {
             nextStates.push_back(nextState);
+        }*/
+        for(auto nextState : transitions) {
+            nextStates.push_back(nextState.second);
         }
     }
 

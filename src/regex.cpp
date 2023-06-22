@@ -1,22 +1,37 @@
 #include "regex.hpp"
 
 Regex::Regex(std::string regex) {
-    SyntaxTree * syntaxTree = new SyntaxTree();
+    syntaxTree = new SyntaxTree();
     syntaxTree->build(regex);
-
-    automato = new DFA(*syntaxTree);
-    automato->generateTransitions(syntaxTree->getRoot());
+    automato = nullptr;
 }
 
 Regex::~Regex() {
-    delete (DFA*)automato;
+    if(type == dfa)
+        delete (DFA*)automato;
+    else
+        delete (NFA*)automato;
 }
 
 bool Regex::match(std::string text) {
+    if(automato != nullptr)
+        delete automato;
+    
+    automato = new DFA(*syntaxTree);
+    type = dfa;
+    automato->generateTransitions(syntaxTree->getRoot());
+
     return false;
 }
 
 std::vector<std::string> Regex::iterator(std::string text) {
+    if(automato != nullptr)
+        delete automato;
+    
+    automato = new NFA(*syntaxTree);
+    type = nfa;
+    automato->generateTransitions(syntaxTree->getRoot());
+
     std::vector<std::string> result;
     //
     return result;

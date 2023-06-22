@@ -4,9 +4,16 @@
 #include "dfa.hpp"
 #include "nfa.hpp"
 
+enum Type {
+    dfa,
+    nfa
+};
+
 class Regex {
 private:
+    SyntaxTree * syntaxTree;
     Automato * automato;
+    Type type;
 public:
     Regex(std::string regex);
     ~Regex();

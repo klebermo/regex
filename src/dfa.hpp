@@ -4,10 +4,6 @@
 #include "automato.hpp"
 
 class DFA : public Automato {
-private:
-    std::unordered_map<std::pair<int, char>, int, pair_hash> transitions;
-    int startState;
-    std::unordered_set<int> acceptStates;
 public:
     DFA(SyntaxTree& syntaxTree);
     ~DFA();
