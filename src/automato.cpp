@@ -1,9 +1,9 @@
 #include "automato.hpp"
 
-Automato::Automato() {
-    this->syntaxTree = new SyntaxTree();
+Automato::Automato(std::string regex) {
+    syntaxTree = new SyntaxTree(regex);
 }
 
 Automato::~Automato() {
-    delete this->syntaxTree;
+    delete syntaxTree;
 }
