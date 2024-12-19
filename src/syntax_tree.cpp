@@ -1,65 +1,77 @@
 #include "syntax_tree.hpp"
 
-SyntaxNode* SyntaxTree::getRoot() {
-    return this->root;
+SyntaxTree::SyntaxTree() {
+    this->root = nullptr;
 }
 
-void SyntaxTree::insert(SyntaxNode * node) {
-    if (this->root == nullptr) {
-        this->root = node;
-    } else {
-        std::stack<SyntaxNode*> nodeStack;
-        nodeStack.push(this->root);
+SyntaxTree::~SyntaxTree() {
+    delete this->root;
+}
 
-        while(!nodeStack.empty()) {
-            SyntaxNode * currentNode = nodeStack.top();
-            nodeStack.pop();
+void SyntaxTree::buildTree(std::string regex) {
+    std::stack<SyntaxNode*> operators;
+    std::stack<SyntaxNode*> operands;
 
-            if(currentNode->isOperator()) {
-                int currentPrecedence = currentNode->operatorPrecedence(currentNode->getValue());
-                int newPrecedence = node->operatorPrecedence(node->getValue());
+    auto precedence = [](char op) -> int {
+        switch(op) {
+            case '|':
+                return 3;
+            case '.':
+                return 2;
+            case '*': case '?' : case '+':
+                return 1;
+            case '(':
+                return 0;
+            default:
+                return -1;
+        }
+    };
 
-                if(newPrecedence < currentPrecedence) {
-                    SyntaxNode * newParentNode = new SyntaxNode(currentNode->getValue());
-                    newParentNode->setLeft(currentNode->getLeft());
-                    newParentNode->setRight(node);
-                    currentNode->setLeft(newParentNode);
-                    break;
-                }
+    auto applyOperator = [&]() {
+        if (operators.empty() || operands.empty()) return;
+        char op = operators.top()->value;
+        operators.pop();
+
+        if (op == '|') { // Union
+            SyntaxNode* right = operands.top(); operands.pop();
+            SyntaxNode* left = operands.top(); operands.pop();
+            SyntaxNode* unionNode = new SyntaxNode(op, left, right);
+            operands.push(unionNode);
+        } else if (op == '.') { // Concatenation
+            SyntaxNode* right = operands.top(); operands.pop();
+            SyntaxNode* left = operands.top(); operands.pop();
+            SyntaxNode* concatNode = new SyntaxNode(op, left, right);
+            operands.push(concatNode);
+        } else if (op == '*' || op == '+' || op == '?') { // Unary Operators
+            SyntaxNode* operand = operands.top(); operands.pop();
+            SyntaxNode* repeatNode = new SyntaxNode(op, operand, nullptr);
+            operands.push(repeatNode);
+        }
+    };
+
+    for (size_t i = 0; i < regex.length(); ++i) {
+        char c = regex[i];
+
+        if (std::isalnum(c) || c == '\n' || c == '^' || c == '$') {
+            operands.push(new SyntaxNode(c));
+        } else if (c == '(') {
+            operators.push(new SyntaxNode(c));
+        } else if (c == ')') {
+            while (!operators.empty() && operators.top()->value != '(') {
+                applyOperator();
             }
-
-            if(currentNode->getLeft() == nullptr) {
-                currentNode->setLeft(node);
-                break;
-            } else if(currentNode->getRight() == nullptr) {
-                currentNode->setRight(node);
-            } else {
-                nodeStack.push(currentNode->getLeft());
-                nodeStack.push(currentNode->getRight());
+            if (!operators.empty()) operators.pop();
+        } else {
+            while (!operators.empty() && precedence(operators.top()->value) >= precedence(c)) {
+                applyOperator();
             }
+            operators.push(new SyntaxNode(c));
         }
     }
-}
 
-SyntaxNode* SyntaxTree::build(std::string expression) {
-    for (std::string::size_type i=0; i<expression.length(); i++) {
-        char token = expression[i];
-        this->insert(new SyntaxNode(token));
+    while (!operators.empty()) {
+        applyOperator();
     }
-    return this->root;
-}
 
-std::vector<SyntaxNode*> SyntaxTree::traverse() {
-    std::vector<SyntaxNode*> nodes;
-    this->traverse(this->root, nodes);
-    return nodes;
-}
-
-std::vector<SyntaxNode*> SyntaxTree::traverse(SyntaxNode * node, std::vector<SyntaxNode*> & nodes) {
-    if (node != nullptr) {
-        this->traverse(node->getLeft(), nodes);
-        nodes.push_back(node);
-        this->traverse(node->getRight(), nodes);
-    }
-    return nodes;
+    this->root = operands.top();
 }

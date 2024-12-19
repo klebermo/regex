@@ -1,19 +1,12 @@
 #ifndef dfa_hpp
 #define dfa_hpp
 
-#include "automato.hpp"
+#include "nfa.hpp"
 
-class DFA : public Automato {
+class DFA : public NFA {
 public:
-    DFA(SyntaxTree& syntaxTree);
+    DFA(NFA nfa);
     ~DFA();
-    void addTransition(int currentState, char symbol, int nextState);
-    void setStartState(int state);
-    void addAcceptState(int state);
-    bool isAcceptedState(int state);
-    int getStartState();
-    std::vector<int> getNextState(int currentState, char symbol);
-    void generateTransitions(SyntaxNode * node);
 };
 
 #endif

@@ -4,7 +4,8 @@ export cpp_flags := -Wall -pedantic -fPIC -g
 all: regex
 
 regex: syntaxNode.o syntaxTree.o automato.o dfa.o nfa.o regex.o
-	$(cc) -shared -o regex.so syntaxNode.o syntaxTree.o automato.o dfa.o nfa.o regex.o
+	$(cc) -shared -o libregex.so syntaxNode.o syntaxTree.o automato.o dfa.o nfa.o regex.o
+	ar rcs libregex.a syntaxNode.o syntaxTree.o automato.o dfa.o nfa.o regex.o
 
 syntaxNode.o: src/syntax_node.cpp
 	$(cc) $(cpp_flags) -c src/syntax_node.cpp -o syntaxNode.o

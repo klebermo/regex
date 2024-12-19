@@ -3,20 +3,14 @@
 
 #include "syntax_node.hpp"
 
-#include <string>
-#include <vector>
-#include <stack>
-
 class SyntaxTree {
-private:
+public:
     SyntaxNode * root;
 
-    std::vector<SyntaxNode*> traverse(SyntaxNode * node, std::vector<SyntaxNode*> & nodes);
-public:
-    SyntaxNode * getRoot();
-    void insert(SyntaxNode * node);
-    SyntaxNode * build(std::string expression);
-    std::vector<SyntaxNode*> traverse();
+    SyntaxTree();
+    ~SyntaxTree();
+    
+    void buildTree(std::string regex);
 };
 
 #endif

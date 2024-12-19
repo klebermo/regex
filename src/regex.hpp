@@ -2,25 +2,19 @@
 #define regex_hpp
 
 #include "dfa.hpp"
-#include "nfa.hpp"
-
-enum Type {
-    dfa,
-    nfa
-};
 
 class Regex {
 private:
-    SyntaxTree * syntaxTree;
-    Automato * automato;
-    Type type;
+    NFA * nfa;
 public:
     Regex(std::string regex);
     ~Regex();
-    bool match(std::string text);
-    std::vector<std::string> iterator(std::string text);
 
+    bool matches(const std::string& input);
+    std::pair<int, int> find(const std::string& input);
+    std::vector<std::pair<int, int>> matchAll(const std::string& input);
+    std::string replace(const std::string& input, const std::string& replacement);
+    bool isMatch(const std::string& input);
 };
-typedef Regex regex;
 
 #endif
