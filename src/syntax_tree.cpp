@@ -1,7 +1,15 @@
 #include "syntax_tree.hpp"
 
 SyntaxTree::SyntaxTree(std::string regex) {
-    root = nullptr;
+    root = fromRegex(regex);
+}
+
+SyntaxTree::~SyntaxTree() {
+    delete root;
+}
+
+SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
+    SyntaxNode * node = nullptr;
 
     std::stack<char> operators;
     std::stack<SyntaxNode*> operands;
@@ -9,65 +17,52 @@ SyntaxTree::SyntaxTree(std::string regex) {
     for (size_t i = 0; i < regex.size(); ++i) {
         char c = regex[i];
 
-        if (std::isalnum(c)) {
-            operands.push(new SyntaxNode(c));
-        } else if (c == '(') {
-            operators.push(c);
-        } else if (c == ')') {
-            while (!operators.empty() && operators.top() != '(') {
-                //
-            }
-        } else if (c == '[') {
-            operators.push(c);
-        } else if (c == ']') {
-            while (!operators.empty() && operators.top() != '[') {
-                //
-            }
-        } else if (c == '{') {
-            operators.push(c);
-        } else if (c == '}') {
-            std::string minrepetitions, maxrepetitions;
-            while (!operators.empty() && operators.top() != '{') {
-                char op = operators.top();
-                operators.pop();
-
-                if(op == ',') {
-                    maxrepetitions = minrepetitions;
-                    minrepetitions = "";
-                } else {
-                    minrepetitions = op + minrepetitions;
+        switch(c) {
+            case '(':
+                operators.push(c);
+                break;
+            case ')':
+                while (!operators.empty() && operators.top() != '(') {
+                    //
                 }
-            }
-
-            SyntaxNode * node = new SyntaxNode(std::stoi(minrepetitions), std::stoi(maxrepetitions), operands.top());
-            operands.pop();
-            operands.push(node);
-        } else if (c == '|') {
-            //
-        } else if (c == '*') {
-            //
-        } else if (c == '+') {
-            //
-        } else if (c == '?') {
-            //
-        } else if (c == '.') {
-            //
-        } else if (c == '^') {
-            //
-        } else if (c == '$') {
-            //
-        } else if ( c == '-') {
-            //
+                break;
+            case '[':
+                operators.push(c);
+                break;
+            case ']':
+                while (!operators.empty() && operators.top() != '[') {
+                    //
+                }
+                break;
+            case '{':
+                operators.push(c);
+                break;
+            case '}':
+                while (!operators.empty() && operators.top() != '{') {
+                    //
+                }
+                break;
+            case '|':
+                break;
+            case '*':
+                break;
+            case '+':
+                break;
+            case '?':
+                break;
+            case '.':
+                break;
+            case '^':
+                break;
+            case '$':
+                break;
+            case '-':
+                break;
+            default:
+                operators.push(c);
+                break;
         }
     }
 
-    root = operands.top();
-}
-
-SyntaxTree::~SyntaxTree() {
-    delete root;
-}
-
-SyntaxNode * SyntaxTree::getRoot() const {
-    return root;
+    return node;
 }

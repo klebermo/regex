@@ -1,16 +1,27 @@
 #ifndef transition_hpp
 #define transition_hpp
 
-#include "state.hpp"
+#include "syntax_tree.hpp"
+
+class State {
+private:
+    int id;
+public:
+    State();
+    State(int id);
+
+    int getId();
+    void setId(int id);
+};
 
 class Transition {
-public:
+private:
     State from;
     char symbol;
     State to;
-
-    Transition(int from, int to, char symbol) : from(from), to(to), symbol(symbol) {}
-    Transition(int from, int to, char symbol, bool isFinal) : from(from), to(to, isFinal), symbol(symbol) {}
+public:
+    Transition();
+    Transition(int from, int to, char symbol);
 };
 
 #endif

@@ -9,34 +9,25 @@
 #include <set>
 #include <cctype>
 #include <stdexcept>
+#include <iostream>
 
 const char operators[] = {'[', ']', '.', '^', '$', '(', ')', '*', '+', '?', '{', '}', '|'};
 const int operatorsSize = 14;
 
 class SyntaxNode {
 public:
-    char value = '\0';
-    int minRepetitions = 0;
-    int maxRepetitions = 0;
+    char value;
+    int minRepetitions;
+    int maxRepetitions;
     SyntaxNode * left;
     SyntaxNode * right;
 
-    // Construtor para nó literal
-    SyntaxNode(char val) : value(val), left(nullptr), right(nullptr) {}
-
-    // Construtor para operadores unários (KleeneStar)
-    SyntaxNode(SyntaxNode* child) : left(child), right(nullptr) {}
-
-    // Construtor para operadores binários (Union, Concatenation)
-    SyntaxNode(SyntaxNode* left, SyntaxNode* right) : left(left), right(right) {}
-    
-    // Construtor para repetição {n,m}
-    SyntaxNode(int minRep, int maxRep, SyntaxNode* child) : left(child), right(nullptr), minRepetitions(minRep), maxRepetitions(maxRep) {}
-    
-    ~SyntaxNode() {
-        delete left;
-        delete right;
-    }
+    SyntaxNode();
+    SyntaxNode(char val);
+    SyntaxNode(char val, SyntaxNode* child);
+    SyntaxNode(char val, SyntaxNode* left, SyntaxNode* right);
+    SyntaxNode(char val, int minRep, int maxRep, SyntaxNode* child);
+    ~SyntaxNode();
 
     bool isOperator() const;
     int operatorPrecedence(char op) const;
