@@ -120,9 +120,9 @@ std::pair<int, int> Regex::find(const std::string& input) const {
 }
 
 std::vector<std::pair<int, int>> Regex::matchAll(const std::string& input) const {
-    std::vector<std::pair<int, int>> matches;
+    std::vector<std::pair<int, int>> output;
 
-    if (transitions.empty()) return matches; // Retorna vazio se não houver transições
+    if (transitions.empty()) return output; // Retorna vazio se não houver transições
 
     // Iterar pela entrada para encontrar todas as correspondências
     for (size_t start = 0; start < input.size(); ++start) {
@@ -153,7 +153,7 @@ std::vector<std::pair<int, int>> Regex::matchAll(const std::string& input) const
 
             // Se alcançarmos o estado final, adicionamos a correspondência
             if (currentStates.find(finalState) != currentStates.end()) {
-                matches.emplace_back(static_cast<int>(start), static_cast<int>(i + 1));
+                output.emplace_back(static_cast<int>(start), static_cast<int>(i + 1));
                 break; // Para esta posição inicial, pare ao encontrar a primeira correspondência
             }
 
@@ -164,7 +164,7 @@ std::vector<std::pair<int, int>> Regex::matchAll(const std::string& input) const
         }
     }
 
-    return matches;
+    return output;
 }
 
 void Regex::replace(std::string& input, std::string replacement) const {
