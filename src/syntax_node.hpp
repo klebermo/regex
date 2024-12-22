@@ -2,6 +2,7 @@
 #define syntax_node_hpp
 
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <stack>
 #include <queue>
@@ -30,7 +31,7 @@ public:
     ~SyntaxNode();
 
     bool isOperator() const;
-    int operatorPrecedence(char op) const;
+    int precedence(char op) const;
 };
 
 #endif

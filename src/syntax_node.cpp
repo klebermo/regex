@@ -51,7 +51,7 @@ bool SyntaxNode::isOperator() const {
     return false;
 }
 
-int SyntaxNode::operatorPrecedence(char op) const {
+int SyntaxNode::precedence(char op) const {
     int result = 0;
     for(int i=0; i<operatorsSize; i++) {
         if(op == operators[i]) {

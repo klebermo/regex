@@ -9,7 +9,7 @@ public:
 
     SyntaxTree(std::string regex);
     ~SyntaxTree();
-    
+
     SyntaxNode * fromRegex(std::string regex);
 };
 

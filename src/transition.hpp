@@ -4,22 +4,19 @@
 #include "syntax_tree.hpp"
 
 class State {
-private:
-    int id;
 public:
+    int id;
+
     State();
     State(int id);
-
-    int getId();
-    void setId(int id);
 };
 
 class Transition {
-private:
+public:
     State from;
     char symbol;
     State to;
-public:
+
     Transition();
     Transition(int from, int to, char symbol);
 };
