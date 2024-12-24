@@ -8,6 +8,10 @@ SyntaxTree::~SyntaxTree() {
     delete root;
 }
 
+SyntaxNode * SyntaxTree::getRoot() {
+    return root;
+}
+
 SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
     SyntaxNode * node = nullptr;
 

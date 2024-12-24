@@ -2,7 +2,7 @@
 
 Regex::Regex(std::string regex) {
     automato = new Automato(regex);
-    buildTransitions(automato->syntaxTree->root, 0);
+    buildTransitions(automato->getSyntaxTree()->getRoot(), 0);
 }
 
 Regex::~Regex() {
@@ -21,11 +21,11 @@ std::unordered_set<int> Regex::epsilonClosure(const std::unordered_set<int>& sta
             int state = stack.top();
             stack.pop();
 
-            for (const auto& transition : transitions) {
-                if (transition.from.id == state && transition.symbol == '\0') {
-                    if (closure.find(transition.to.id) == closure.end()) {
-                        closure.insert(transition.to.id);
-                        stack.push(transition.to.id);
+            for (auto transition : transitions) {
+                if (transition._from() == state && transition._symbol() == '\0') {
+                    if (closure.find(transition._to()) == closure.end()) {
+                        closure.insert(transition._to());
+                        stack.push(transition._to());
                     }
                 }
             }
@@ -44,9 +44,9 @@ bool Regex::matches(std::string& input) const {
 
         // Verifique todas as transições possíveis a partir dos estados ativos
         for (int state : currentStates) {
-            for (const auto& transition : transitions) {
-                if (transition.from.id == state && transition.symbol== c) {
-                    nextStates.insert(transition.to.id);
+            for (auto transition : transitions) {
+                if (transition._from() == state && transition._symbol() == c) {
+                    nextStates.insert(transition._to());
                 }
             }
         }
@@ -92,9 +92,9 @@ std::pair<int, int> Regex::find(const std::string& input) const {
 
             // Realize transições baseadas no caractere atual
             for (int state : currentStates) {
-                for (const auto& transition : transitions) {
-                    if (transition.from.id == state && transition.symbol == c) {
-                        nextStates.insert(transition.to.id);
+                for (auto transition : transitions) {
+                    if (transition._from() == state && transition._symbol() == c) {
+                        nextStates.insert(transition._to());
                     }
                 }
             }
@@ -105,7 +105,8 @@ std::pair<int, int> Regex::find(const std::string& input) const {
 
             // Se alcançarmos o estado final, retornamos a correspondência
             if (currentStates.find(finalState) != currentStates.end()) {
-                return {static_cast<int>(start), static_cast<int>(i + 1)};
+                //return {static_cast<int>(start), static_cast<int>(i + 1)};
+                return {start, i+1};
             }
 
             // Se não houver estados ativos, interrompa esta tentativa
@@ -125,7 +126,7 @@ std::vector<std::pair<int, int>> Regex::matchAll(const std::string& input) const
     if (transitions.empty()) return output; // Retorna vazio se não houver transições
 
     // Iterar pela entrada para encontrar todas as correspondências
-    for (size_t start = 0; start < input.size(); ++start) {
+    for (size_t start = 0; start < input.size(); start++) {
         std::unordered_set<int> currentStates;
         std::unordered_set<int> nextStates;
 
@@ -134,15 +135,15 @@ std::vector<std::pair<int, int>> Regex::matchAll(const std::string& input) const
         currentStates = epsilonClosure(currentStates);
 
         // Verifique a partir da posição `start` na entrada
-        for (size_t i = start; i < input.size(); ++i) {
+        for (size_t i = start; i < input.size(); i++) {
             char c = input[i];
             nextStates.clear();
 
             // Realize transições baseadas no caractere atual
             for (int state : currentStates) {
-                for (const auto& transition : transitions) {
-                    if (transition.from.id == state && transition.symbol == c) {
-                        nextStates.insert(transition.to.id);
+                for (auto transition : transitions) {
+                    if (transition._from() == state && transition._symbol() == c) {
+                        nextStates.insert(transition._to());
                     }
                 }
             }
@@ -153,7 +154,8 @@ std::vector<std::pair<int, int>> Regex::matchAll(const std::string& input) const
 
             // Se alcançarmos o estado final, adicionamos a correspondência
             if (currentStates.find(finalState) != currentStates.end()) {
-                output.emplace_back(static_cast<int>(start), static_cast<int>(i + 1));
+                //output.emplace_back(static_cast<int>(start), static_cast<int>(i + 1));
+                output.push_back({start, i+1});
                 break; // Para esta posição inicial, pare ao encontrar a primeira correspondência
             }
 
@@ -198,9 +200,9 @@ bool Regex::isMatch(const std::string& input) {
 
         // Processa as transições para o caractere atual
         for (int state : currentStates) {
-            for (const Transition& transition : transitions) {
-                if (transition.from.id == state && (transition.symbol == c || transition.symbol == '\0')) {
-                    nextStates.insert(transition.to.id);
+            for (auto transition : transitions) {
+                if (transition._from() == state && (transition._symbol() == c || transition._symbol() == '\0')) {
+                    nextStates.insert(transition._to());
                 }
             }
         }
@@ -217,17 +219,17 @@ void Regex::addTransition(int from, int to, char symbol) {
     transitions.push_back(Transition(from, to, symbol));
 }
 
-std::pair<int, int> regex::buildTransitions(const SyntaxNode * node, int stateCounter) {
+std::pair<int, int> regex::buildTransitions(SyntaxNode * node, int stateCounter) {
     if(!node) return {-1, -1};
 
     int start = stateCounter++;
     int end = stateCounter++;
 
-    switch(node->value) {
+    switch(node->_value()) {
         case '|':
             {
-                auto left = buildTransitions(node->left, stateCounter);
-                auto right = buildTransitions(node->right, stateCounter);
+                auto left = buildTransitions(node->_left(), stateCounter);
+                auto right = buildTransitions(node->_right(), stateCounter);
                 addTransition(start, left.first, '\0'); // Transição epsilon para o início do ramo esquerdo
                 addTransition(start, right.first, '\0'); // Transição epsilon para o início do ramo direito
                 addTransition(left.second, end, '\0'); // Transição epsilon do fim do ramo esquerdo para o fim
@@ -236,8 +238,8 @@ std::pair<int, int> regex::buildTransitions(const SyntaxNode * node, int stateCo
             }
         case '.':
             {
-                auto left = buildTransitions(node->left, stateCounter);
-                auto right = buildTransitions(node->right, stateCounter);
+                auto left = buildTransitions(node->_left(), stateCounter);
+                auto right = buildTransitions(node->_right(), stateCounter);
 
                 addTransition(start, left.first, '\0'); // Transição epsilon para o início do ramo esquerdo
                 addTransition(left.second, right.first, '\0'); // Conexão entre os ramos
@@ -256,14 +258,14 @@ std::pair<int, int> regex::buildTransitions(const SyntaxNode * node, int stateCo
             }
         case '-':
             {
-                for(char ch = node->left->value; ch <= node->right->value; ++ch) {
+                for(char ch = node->_left()->_value(); ch <= node->_right()->_value(); ++ch) {
                     addTransition(start, end, ch);
                 }
                 break;
             }
         case '*':
             {
-                auto child = buildTransitions(node->left, stateCounter);
+                auto child = buildTransitions(node->_left(), stateCounter);
 
                 addTransition(start, child.first, '\0'); // Transição epsilon para o início do filho
                 addTransition(child.second, child.first, '\0'); // Ciclo para repetição
@@ -273,7 +275,7 @@ std::pair<int, int> regex::buildTransitions(const SyntaxNode * node, int stateCo
             }
         case '+':
             {
-                auto child = buildTransitions(node->left, stateCounter);
+                auto child = buildTransitions(node->_left(), stateCounter);
 
                 addTransition(start, child.first, '\0'); // Transição epsilon para o início do filho
                 addTransition(child.second, child.first, '\0'); // Ciclo para repetição
@@ -282,7 +284,7 @@ std::pair<int, int> regex::buildTransitions(const SyntaxNode * node, int stateCo
             }
         case '?':
             {
-                auto child = buildTransitions(node->left, stateCounter);
+                auto child = buildTransitions(node->_left(), stateCounter);
 
                 addTransition(start, child.first, '\0'); // Transição epsilon para o início do filho
                 addTransition(child.second, end, '\0'); // Transição epsilon para o fim
@@ -291,19 +293,19 @@ std::pair<int, int> regex::buildTransitions(const SyntaxNode * node, int stateCo
             }
         case '{':
             {
-                int minRepeats = node->left->value - '0'; // Valor mínimo de repetições
-                int maxRepeats = node->right->value - '0'; // Valor máximo de repetições
+                int minRepeats = node->_left()->_value() - '0'; // Valor mínimo de repetições
+                int maxRepeats = node->_right()->_value() - '0'; // Valor máximo de repetições
 
                 int prevEnd = start;
                 for (int i = 0; i < minRepeats; ++i) {
-                    auto child = buildTransitions(node->left, stateCounter);
+                    auto child = buildTransitions(node->_left(), stateCounter);
                     addTransition(prevEnd, child.first, '\0');
                     prevEnd = child.second;
                 }
 
                 if (maxRepeats > minRepeats) {
                     for (int i = minRepeats; i < maxRepeats; ++i) {
-                        auto child = buildTransitions(node->left, stateCounter);
+                        auto child = buildTransitions(node->_left(), stateCounter);
                         addTransition(prevEnd, child.first, '\0');
                         addTransition(child.second, end, '\0');
                     }
@@ -313,7 +315,7 @@ std::pair<int, int> regex::buildTransitions(const SyntaxNode * node, int stateCo
                 break;
             }
         default:
-            addTransition(start, end, node->value);
+            addTransition(start, end, node->_value());
             break;
     }
 

@@ -45,6 +45,26 @@ SyntaxNode::~SyntaxNode() {
     delete right;
 }
 
+char SyntaxNode::_value() {
+    return value;
+}
+
+int SyntaxNode::_minRepetitions() {
+    return minRepetitions;
+}
+
+int SyntaxNode::_maxRepetitions() {
+    return maxRepetitions;
+}
+
+SyntaxNode * SyntaxNode::_left() {
+    return left;
+}
+
+SyntaxNode * SyntaxNode::_right() {
+    return right;
+}
+
 bool SyntaxNode::isOperator() const {
     for(int i = 0; i < operatorsSize; i++)
         if(this->value == operators[i]) return true;

@@ -7,3 +7,7 @@ Automato::Automato(std::string regex) {
 Automato::~Automato() {
     delete syntaxTree;
 }
+
+SyntaxTree * Automato::getSyntaxTree() {
+    return this->syntaxTree;
+}

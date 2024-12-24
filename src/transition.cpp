@@ -19,3 +19,20 @@ Transition::Transition(int from, int to, char symbol) {
     this->to = to;
     this->symbol = symbol;
 }
+
+int State::getId() {
+    return id;
+}
+
+int Transition::_from() {
+    return from.getId();
+}
+
+
+char Transition::_symbol() {
+    return symbol;
+}
+
+int Transition::_to() {
+    return to.getId();
+}

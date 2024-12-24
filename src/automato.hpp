@@ -4,11 +4,12 @@
 #include "syntax_tree.hpp"
 
 class Automato {
-public:
     SyntaxTree * syntaxTree;
-    
+public:
     Automato(std::string regex);
     ~Automato();
+
+    SyntaxTree * getSyntaxTree();
 };
 
 #endif

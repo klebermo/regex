@@ -4,12 +4,12 @@
 #include "syntax_node.hpp"
 
 class SyntaxTree {
-public:
     SyntaxNode * root;
-
+public:
     SyntaxTree(std::string regex);
     ~SyntaxTree();
 
+    SyntaxNode * getRoot();
     SyntaxNode * fromRegex(std::string regex);
 };
 

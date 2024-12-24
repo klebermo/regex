@@ -10,7 +10,7 @@ private:
     std::vector<Transition> transitions;
     int finalState;
 
-    std::pair<int, int> buildTransitions(const SyntaxNode * node, int stateCounter = 0);
+    std::pair<int, int> buildTransitions(SyntaxNode * node, int stateCounter = 0);
     void addTransition(int from, int to, char symbol); 
     std::unordered_set<int> epsilonClosure(const std::unordered_set<int>& states) const;
 public:

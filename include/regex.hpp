@@ -1,4 +1,5 @@
 #include <string>
+#include <unordered_set>
 #include <vector>
 #include <stack>
 #include <queue>
@@ -6,18 +7,18 @@
 #include <set>
 #include <cctype>
 #include <stdexcept>
+#include <iostream>
 
 #ifndef syntax_node_hpp
 #define syntax_node_hpp
 
 class SyntaxNode {
-public:
     char value;
     int minRepetitions;
     int maxRepetitions;
     SyntaxNode * left;
     SyntaxNode * right;
-
+public:
     SyntaxNode();
     SyntaxNode(char val);
     SyntaxNode(char val, SyntaxNode* child);
@@ -25,8 +26,14 @@ public:
     SyntaxNode(char val, int minRep, int maxRep, SyntaxNode* child);
     ~SyntaxNode();
 
+    char _value();
+    int _minRepetitions();
+    int _maxRepetitions();
+    SyntaxNode * _left();
+    SyntaxNode * _right();
+
     bool isOperator() const;
-    int operatorPrecedence(char op) const;
+    int precedence(char op) const;
 };
 
 #endif
@@ -35,12 +42,12 @@ public:
 #define TREE_HPP
 
 class SyntaxTree {
-public:
     SyntaxNode * root;
-
+public:
     SyntaxTree(std::string regex);
     ~SyntaxTree();
-    
+
+    SyntaxNode * getRoot();
     SyntaxNode * fromRegex(std::string regex);
 };
 
@@ -50,14 +57,12 @@ public:
 #define state_hpp
 
 class State {
-private:
     int id;
 public:
     State();
     State(int id);
 
     int getId();
-    void setId(int id);
 };
 
 #endif
@@ -66,13 +71,16 @@ public:
 #define transition_hpp
 
 class Transition {
-private:
     State from;
     char symbol;
     State to;
 public:
     Transition();
     Transition(int from, int to, char symbol);
+
+    int _from();
+    char _symbol();
+    int _to();
 };
 
 #endif
@@ -81,11 +89,12 @@ public:
 #define AUTOMATO_HPP
 
 class Automato {
-public:
     SyntaxTree * syntaxTree;
-    
+public:
     Automato(std::string regex);
     ~Automato();
+
+    SyntaxTree * getSyntaxTree();
 };
 
 #endif
@@ -96,6 +105,12 @@ public:
 class Regex {
 private:
     Automato * automato;
+    std::vector<Transition> transitions;
+    int finalState;
+
+    std::pair<int, int> buildTransitions(SyntaxNode * node, int stateCounter = 0);
+    void addTransition(int from, int to, char symbol); 
+    std::unordered_set<int> epsilonClosure(const std::unordered_set<int>& states) const;
 public:
     Regex(std::string regex);
     ~Regex();
