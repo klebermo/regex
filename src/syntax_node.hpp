@@ -10,15 +10,17 @@
 #include <set>
 #include <cctype>
 #include <stdexcept>
+#include <algorithm>
 #include <iostream>
 
 const char operators[] = {'[', ']', '.', '^', '$', '(', ')', '*', '+', '?', '{', '}', '|'};
 const int operatorsSize = 14;
+int precedence(char op);
+bool isOperator(char c);
 
 class SyntaxNode {
+private:
     char value;
-    int minRepetitions;
-    int maxRepetitions;
     SyntaxNode * left;
     SyntaxNode * right;
 public:
@@ -26,17 +28,11 @@ public:
     SyntaxNode(char val);
     SyntaxNode(char val, SyntaxNode* child);
     SyntaxNode(char val, SyntaxNode* left, SyntaxNode* right);
-    SyntaxNode(char val, int minRep, int maxRep, SyntaxNode* child);
     ~SyntaxNode();
 
     char _value();
-    int _minRepetitions();
-    int _maxRepetitions();
     SyntaxNode * _left();
     SyntaxNode * _right();
-
-    bool isOperator() const;
-    int precedence(char op) const;
 };
 
 #endif

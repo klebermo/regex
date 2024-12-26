@@ -4,6 +4,7 @@
 #include "syntax_node.hpp"
 
 class SyntaxTree {
+private:
     SyntaxNode * root;
 public:
     SyntaxTree(std::string regex);
@@ -11,6 +12,8 @@ public:
 
     SyntaxNode * getRoot();
     SyntaxNode * fromRegex(std::string regex);
+
+    void print();
 };
 
 #endif

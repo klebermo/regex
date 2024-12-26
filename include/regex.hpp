@@ -31,9 +31,6 @@ public:
     int _maxRepetitions();
     SyntaxNode * _left();
     SyntaxNode * _right();
-
-    bool isOperator() const;
-    int precedence(char op) const;
 };
 
 #endif
@@ -43,12 +40,16 @@ public:
 
 class SyntaxTree {
     SyntaxNode * root;
+
+    void print(SyntaxNode * node);
 public:
     SyntaxTree(std::string regex);
     ~SyntaxTree();
 
     SyntaxNode * getRoot();
     SyntaxNode * fromRegex(std::string regex);
+
+    void print();
 };
 
 #endif
@@ -90,11 +91,23 @@ public:
 
 class Automato {
     SyntaxTree * syntaxTree;
+    std::vector<Transition> transitions;
+    int finalState;
+
+    std::pair<int, int> buildTransitions(SyntaxNode * node, int stateCounter);
 public:
     Automato(std::string regex);
     ~Automato();
 
-    SyntaxTree * getSyntaxTree();
+    std::unordered_set<int> epsilonClosure(const std::unordered_set<int>& states) const;
+    void addTransition(int from, int to, char value);
+    void buildTransitions();
+
+    bool matches(std::string& input);
+    std::pair<int, int> find(const std::string& input);
+    std::vector<std::pair<int, int>> matchAll(const std::string& input);
+    void replace(std::string& input, std::string replacement);
+    bool isMatch(const std::string& input);    
 };
 
 #endif
@@ -104,23 +117,16 @@ public:
 
 class Regex {
 private:
-    Automato * automato;
-    std::vector<Transition> transitions;
-    int finalState;
-
-    std::pair<int, int> buildTransitions(SyntaxNode * node, int stateCounter = 0);
-    void addTransition(int from, int to, char symbol); 
-    std::unordered_set<int> epsilonClosure(const std::unordered_set<int>& states) const;
+    Automato * automato;    
 public:
     Regex(std::string regex);
     ~Regex();
 
-    bool matches(std::string& input) const;
-    std::pair<int, int> find(const std::string& input) const;
-    std::vector<std::pair<int, int>> matchAll(const std::string& input) const;
-    void replace(std::string& input, std::string replacement) const;
+    bool matches(std::string& input);
+    std::pair<int, int> find(const std::string& input);
+    std::vector<std::pair<int, int>> matchAll(const std::string& input);
+    void replace(std::string& input, std::string replacement);
     bool isMatch(const std::string& input);
 };
-typedef Regex regex;
 
 #endif

@@ -12,116 +12,125 @@ SyntaxNode * SyntaxTree::getRoot() {
     return root;
 }
 
-SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
-    SyntaxNode * node = nullptr;
+void SyntaxTree::print() {
+    if(root == nullptr) return;
 
-    std::stack<char> operators;
+    std::stack<SyntaxNode*> stack;
+    SyntaxNode* current = root;
+
+    while(current != nullptr || !stack.empty()) {
+        while(current != nullptr) {
+            stack.push(current);
+            current = current->_left();
+        }
+
+        current = stack.top();
+        stack.pop();
+
+        std::cout << current->_value() << " ";
+        current = current->_right();
+    }
+}
+
+SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
     std::stack<SyntaxNode*> operands;
 
-    std::string charset = "";
-    SyntaxNode * temp = new SyntaxNode();
-
-    for (size_t i = 0; i < regex.size(); ++i) {
+    for (size_t i = 0; i < regex.size(); i++) {
         char c = regex[i];
 
         switch(c) {
-            case '(':
-                operators.push(c);
-                break;
-            case ')':
-                while (!operators.empty() && operators.top() != '(') {
-                    SyntaxNode * right = operands.top(); operands.pop();
-                    SyntaxNode * left = operands.top(); operands.pop();
-                    char op = operators.top(); operators.pop();
-                    operands.push(new SyntaxNode(op, left, right));
-                }
-                if(!operators.empty() && operators.top() == '(') operators.pop();
-                break;
-            case '[':
-                operators.push(c);
-                break;
             case ']':
-                while (!operators.empty() && operators.top() != '[') {
-                    charset += operators.top();
-                    operators.pop();
+                {
+                    std::string charset;
+                    while(!operands.empty() && operands.top()->_value() != '[') {
+                        auto op = operands.top(); operands.pop();
+                        if(op->_value() != '[' && op->_value() != ']') charset += op->_value();
+                    }
+                    operands.push(new SyntaxNode('[', fromRegex(charset), nullptr));
+                    break;
                 }
-                if(!operators.empty() && operators.top() == '[') operators.pop();
-                for(std::string::size_type i=0; i<charset.size(); i++) {
-                    SyntaxNode * right = new SyntaxNode(charset.at(i));
-                    SyntaxNode * left = new SyntaxNode(charset.at(++i));
-                    SyntaxNode * node = new SyntaxNode('.', left, right);
-                    operands.push(node);
-                }
-                break;
-            case '{':
-                operators.push(c);
-                break;
-            case '}':
-                while (!operators.empty() && operators.top() != '{') {
-                    //
-                }
-                break;
-            case '|':
-                while(!operators.empty() && temp->precedence(operators.top()) >= temp->precedence(c)) {
-                    SyntaxNode * right = operands.top(); operands.pop();
-                    SyntaxNode * left = operands.top(); operands.pop();
-                    char op = operators.top(); operators.pop();
-                    operands.push(new SyntaxNode(op, left, right));
-                }
-                operators.push('|');
-                break;
-            case '*':
-                if(!operands.empty()) {
-                    SyntaxNode * child = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('*', child));
-                }
-                break;
-            case '+':
-                if(!operands.empty()) {
-                    SyntaxNode * child = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('+', child));
-                }
-                break;
-            case '?':
-                if(!operands.empty()) {
-                    SyntaxNode * child = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('?', child));
-                }
-                break;
             case '.':
-                while(!operators.empty() && temp->precedence(operators.top()) >= temp->precedence(c)) {
-                    SyntaxNode * right = operands.top(); operands.pop();
-                    SyntaxNode * left = operands.top(); operands.pop();
-                    char op = operators.top(); operators.pop();
-                    operands.push(new SyntaxNode(op, left, right));
+                {
+                    SyntaxNode * node = operands.top(); operands.pop();
+                    operands.push(new SyntaxNode('.', node, nullptr));
+                    break;
                 }
-                operators.push('.');
-                break;
             case '^':
-                operands.push(new SyntaxNode('^'));
-                break;
+                {
+                    SyntaxNode * node = operands.top(); operands.pop();
+                    operands.push(new SyntaxNode('^', node, nullptr));                    
+                    break;
+                }
             case '$':
-                operands.push(new SyntaxNode('$'));
-                break;
-            case '-':
-                operators.push('-');
-                break;
+                {
+                    SyntaxNode * node = operands.top(); operands.pop();
+                    operands.push(new SyntaxNode('$', node, nullptr));
+                    break;
+                }                
+            case ')':
+                {
+                    std::string charset;
+                    while(!operands.empty() && operands.top()->_value() != '(') {
+                        auto op = operands.top(); operands.pop();
+                        if(op->_value() != '(' && op->_value() != ')') charset += op->_value();
+                    }
+                    operands.push(new SyntaxNode('(', fromRegex(charset), nullptr));
+                    break;
+                }
+            case '*':
+                {
+                    SyntaxNode * node = operands.top(); operands.pop();
+                    operands.push(new SyntaxNode('*', node, nullptr));
+                    break;
+                }                
+            case '+':
+                {
+                    SyntaxNode * node = operands.top(); operands.pop();
+                    operands.push(new SyntaxNode('+', node, nullptr));
+                    break;
+                }
+            case '?':
+                {
+                    SyntaxNode * node = operands.top(); operands.pop();
+                    operands.push(new SyntaxNode('?', node, nullptr));
+                    break;
+                }                
+            case '}':
+                {
+                    std::string min, max;
+                    while(!operands.empty() && operands.top()->_value() != '{') {
+                        auto op = operands.top(); operands.pop();
+                        while(op->_value() != '{' && op->_value() != '}' && isalnum(op->_value())) {
+                            max += op->_value();
+                            op = operands.top(); operands.pop();
+                        }
+                        if(isalnum(op->_value())) min += op->_value();
+                    }
+                    auto left = new SyntaxNode(stoi(min));
+                    auto right = new SyntaxNode(stoi(max));
+                    operands.push(new SyntaxNode('{', left, right));
+                    break;
+                }
+            case '|':
+                {
+                    SyntaxNode * left = operands.top(); operands.pop();
+                    operands.push(new SyntaxNode('|', left, nullptr));
+                    break;
+                }
             default:
-                operands.push(new SyntaxNode(c));
-                break;
+                {
+                    operands.push(new SyntaxNode(c));
+                    break;
+                }
+        }
+
+        while(operands.size()>1) {
+            auto left = operands.top(); operands.pop();
+            auto right = operands.top(); operands.pop();
+            auto node = new SyntaxNode('.', left, right);
+            operands.push(node);
         }
     }
 
-    while(!operators.empty()) {
-        SyntaxNode * right = operands.top(); operands.pop();
-        SyntaxNode * left = operands.top(); operands.pop();
-        char op = operators.top(); operators.pop();
-        operands.push(new SyntaxNode(op, left, right));
-    }
-
-    if(!operands.empty()) {
-        node = operands.top();
-    }
-
-    return node;
+    return operands.top();
 }

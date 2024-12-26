@@ -4,6 +4,7 @@
 #define state_hpp
 
 class State {
+private:
     int id;
 public:
     State();
@@ -18,6 +19,7 @@ public:
 #define transition_hpp
 
 class Transition {
+private:
     State from;
     char symbol;
     State to;
