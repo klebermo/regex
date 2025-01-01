@@ -55,6 +55,15 @@ SyntaxNode * SyntaxNode::_left() {
     return left;
 }
 
+void SyntaxNode::_left(SyntaxNode * node) {
+    left = node;
+}
+
 SyntaxNode * SyntaxNode::_right() {
     return right;
 }
+
+void SyntaxNode::_right(SyntaxNode * node) {
+    right = node;
+}
+

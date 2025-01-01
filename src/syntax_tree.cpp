@@ -13,23 +13,27 @@ SyntaxNode * SyntaxTree::getRoot() {
 }
 
 void SyntaxTree::print() {
-    if(root == nullptr) return;
-
-    std::stack<SyntaxNode*> stack;
-    SyntaxNode* current = root;
-
-    while(current != nullptr || !stack.empty()) {
-        while(current != nullptr) {
-            stack.push(current);
-            current = current->_left();
-        }
-
-        current = stack.top();
-        stack.pop();
-
-        std::cout << current->_value() << " ";
-        current = current->_right();
+    if(root == nullptr) {
+        std::cout << "_" << std::endl;
+        return;
     }
+
+    std::cout << root->_value() << std::endl;
+    print(root->_left(), 1);
+    print(root->_right(), 1);
+}
+
+void SyntaxTree::print(SyntaxNode * node, int level) {
+    if(node == nullptr) {
+        for(int i=0; i<level; i++) std::cout << "\t";
+        std::cout << '_' << std::endl;
+        return;
+    }
+
+    for(int i=0; i<level; i++) std::cout << "\t";
+    std::cout << node->_value() << std::endl;
+    print(node->_left(), level+1);
+    print(node->_right(), level+1);
 }
 
 SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
@@ -37,6 +41,7 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
 
     for (size_t i = 0; i < regex.size(); i++) {
         char c = regex[i];
+        std::cout << "SyntaxTree | fromRegex | c: " << c << std::endl;
 
         switch(c) {
             case '[':
@@ -47,29 +52,32 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
             case ']':
                 {
                     std::string charset;
-                    while(!operands.empty() && operands.top()->_value() != '[') {
-                        auto op = operands.top(); operands.pop();
-                        if(op->_value() != '[' && op->_value() != ']') charset += op->_value();
+                    while(operands.top()->_value() != '[') {
+                        charset += operands.top()->_value();
+                        operands.pop();
                     }
                     operands.push(new SyntaxNode('[', fromRegex(charset), nullptr));
                     break;
                 }
             case '.':
                 {
-                    SyntaxNode * node = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('.', node, nullptr));
-                    break;
+                    if(operands.empty()) {
+                        operands.push(new SyntaxNode('.'));
+                        break;
+                    } else {
+                        SyntaxNode * node = operands.top(); operands.pop();
+                        operands.push(new SyntaxNode('.', node, nullptr));
+                        break;
+                    }
                 }
             case '^':
                 {
-                    SyntaxNode * node = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('^', node, nullptr));                    
+                    operands.push(new SyntaxNode('^'));
                     break;
                 }
             case '$':
                 {
-                    SyntaxNode * node = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('$', node, nullptr));
+                    operands.push(new SyntaxNode('$'));
                     break;
                 }
             case '(':
@@ -80,29 +88,26 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
             case ')':
                 {
                     std::string charset;
-                    while(!operands.empty() && operands.top()->_value() != '(') {
-                        auto op = operands.top(); operands.pop();
-                        if(op->_value() != '(' && op->_value() != ')') charset += op->_value();
+                    while(operands.top()->_value() != '(') {
+                        charset += operands.top()->_value();
+                        operands.pop();
                     }
-                    operands.push(new SyntaxNode('(', fromRegex(charset), nullptr));
+                    operands.push(new SyntaxNode('(', fromRegex(charset)));
                     break;
                 }
             case '*':
                 {
-                    SyntaxNode * node = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('*', node, nullptr));
+                    operands.push(new SyntaxNode('*'));
                     break;
                 }                
             case '+':
                 {
-                    SyntaxNode * node = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('+', node, nullptr));
+                    operands.push(new SyntaxNode('+'));
                     break;
                 }
             case '?':
                 {
-                    SyntaxNode * node = operands.top(); operands.pop();
-                    operands.push(new SyntaxNode('?', node, nullptr));
+                    operands.push(new SyntaxNode('?'));
                     break;
                 }
             case '{':
@@ -113,13 +118,13 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
             case '}':
                 {
                     std::string min, max;
-                    while(!operands.empty() && operands.top()->_value() != '{') {
-                        auto op = operands.top(); operands.pop();
-                        while(op->_value() != '{' && op->_value() != '}' && isalnum(op->_value())) {
-                            max += op->_value();
-                            op = operands.top(); operands.pop();
+                    while(operands.top()->_value() != '{') {
+                        while(isalnum(operands.top()->_value())) {
+                            max += operands.top()->_value();
+                            operands.pop();
                         }
-                        if(isalnum(op->_value())) min += op->_value();
+                        min += operands.top()->_value();
+                        operands.pop();
                     }
                     auto left = new SyntaxNode(stoi(min));
                     auto right = new SyntaxNode(stoi(max));
@@ -134,11 +139,24 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
                 }
             default:
                 {
-                    operands.push(new SyntaxNode(c));
-                    break;
+                    if(operands.empty()) {
+                        operands.push(new SyntaxNode(c));
+                        break;
+                    } else {
+                        SyntaxNode * node = operands.top(); operands.pop();
+                        SyntaxNode * child = new SyntaxNode(node->_value());
+                        if(node->_left() == nullptr) {
+                            child->_left(new SyntaxNode(c));
+                        } else {
+                            child->_right(new SyntaxNode(c));
+                        }
+                        operands.push(child);
+                        break;
+                    }
                 }
         }
     }
+    std::cout << "SyntaxTree | fromRegex | operands.size(): " << operands.size() << std::endl;
 
     while(operands.size() > 1) {
         SyntaxNode * right = operands.top(); operands.pop();

@@ -32,7 +32,9 @@ public:
 
     char _value();
     SyntaxNode * _left();
+    void _left(SyntaxNode * node);
     SyntaxNode * _right();
+    void _right(SyntaxNode * node);
 };
 
 #endif

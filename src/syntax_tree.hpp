@@ -14,6 +14,7 @@ public:
     SyntaxNode * fromRegex(std::string regex);
 
     void print();
+    void print(SyntaxNode * node, int level);
 };
 
 #endif

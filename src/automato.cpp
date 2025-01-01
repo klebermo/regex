@@ -49,6 +49,7 @@ void Automato::buildTransitions() {
 }
 
 std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCounter) {
+    std::cout << "Automato | buildTransitions | node->_value(): " << node->_value() << std::endl;
     if(!node) return {-1, -1};
 
     int start = stateCounter++;
@@ -59,8 +60,13 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
     switch(c) {
             case '[':
                 {
-                    buildTransitions(node->_left(), stateCounter);
-                    buildTransitions(node->_right(), stateCounter);
+                    auto left = buildTransitions(node->_left(), stateCounter);
+                    auto right = buildTransitions(node->_right(), stateCounter);
+
+                    addTransition(start, left.first, '\0');
+                    addTransition(left.second, right.first, '\0');
+                    addTransition(right.second, end, '\0');
+
                     break;
                 }
             case '.':
@@ -68,59 +74,84 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
                     auto left = buildTransitions(node->_left(), stateCounter);
                     auto right = buildTransitions(node->_right(), stateCounter);
                     
-                    addTransition(start, left.first, '\0'); // Transição epsilon para o início do ramo esquerdo
-                    addTransition(left.second, right.first, '\0'); // Conexão entre os ramos
-                    addTransition(right.second, end, '\0'); // Transição epsilon do fim do ramo direito para o fim
+                    addTransition(start, left.first, '\0');
+                    addTransition(left.second, right.first, '\0');
+                    addTransition(right.second, end, '\0');
+
                     break;
                 }
             case '^':
                 {
-                    addTransition(start, end, '\0');
+                    //addTransition(start, end, '\0');
+
+                    auto left = buildTransitions(node->_left(), stateCounter);
+                    auto right = buildTransitions(node->_right(), stateCounter);
+
+                    addTransition(start, left.first, '\0');
+                    addTransition(left.second, right.first, '\0');
+                    addTransition(right.second, end, '\0');
+
                     break;
                 }
             case '$':
                 {
-                    addTransition(start, end, '\0');
+                    //addTransition(start, end, '\0');
+
+                    auto left = buildTransitions(node->_left(), stateCounter);
+                    auto right = buildTransitions(node->_right(), stateCounter);
+
+                    addTransition(start, left.first, '\0');
+                    addTransition(left.second, right.first, '\0');
+                    addTransition(right.second, end, '\0');
+
                     break;
                 }
             case '(':
                 {
-                    buildTransitions(node->_left(), stateCounter);
-                    buildTransitions(node->_right(), stateCounter);
+                    auto left = buildTransitions(node->_left(), stateCounter);
+                    auto right = buildTransitions(node->_right(), stateCounter);
+
+                    addTransition(start, left.first, '\0');
+                    addTransition(left.second, right.first, '\0');
+                    addTransition(right.second, end, '\0');
+
                     break;
                 }
             case '*':
                 {
                     auto child = buildTransitions(node->_left(), stateCounter);
 
-                    addTransition(start, child.first, '\0'); // Transição epsilon para o início do filho
-                    addTransition(child.second, child.first, '\0'); // Ciclo para repetição
-                    addTransition(child.second, end, '\0'); // Transição epsilon para o fim
-                    addTransition(start, end, '\0'); // Transição epsilon para representar 0 ocorrências
+                    addTransition(start, child.first, '\0');
+                    addTransition(child.second, child.first, '\0');
+                    addTransition(child.second, end, '\0');
+                    addTransition(start, end, '\0');
+
                     break;
                 }                
             case '+':
                 {
                     auto child = buildTransitions(node->_left(), stateCounter);
 
-                    addTransition(start, child.first, '\0'); // Transição epsilon para o início do filho
-                    addTransition(child.second, child.first, '\0'); // Ciclo para repetição
-                    addTransition(child.second, end, '\0'); // Transição epsilon para o fi
+                    addTransition(start, child.first, '\0');
+                    addTransition(child.second, child.first, '\0');
+                    addTransition(child.second, end, '\0');
+
                     break;
                 }
             case '?':
                 {
                     auto child = buildTransitions(node->_left(), stateCounter);
 
-                    addTransition(start, child.first, '\0'); // Transição epsilon para o início do filho
-                    addTransition(child.second, end, '\0'); // Transição epsilon para o fim
-                    addTransition(start, end, '\0'); // Transição epsilon para representar 0 ocorrências
+                    addTransition(start, child.first, '\0');
+                    addTransition(child.second, end, '\0');
+                    addTransition(start, end, '\0');
+
                     break;
                 }                
             case '{':
                 {
-                    int minRepeats = node->_left()->_value() - '0'; // Valor mínimo de repetições
-                    int maxRepeats = node->_right()->_value() - '0'; // Valor máximo de repetições
+                    int minRepeats = node->_left()->_value() - '0';
+                    int maxRepeats = node->_right()->_value() - '0';
 
                     int prevEnd = start;
                     for (int i = 0; i < minRepeats; ++i) {
@@ -137,7 +168,7 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
                         }
                     }
 
-                    addTransition(prevEnd, end, '\0'); // Conexão final
+                    addTransition(prevEnd, end, '\0');
                     break;
                 }                
             case '|':
@@ -145,10 +176,11 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
                     auto left = buildTransitions(node->_left(), stateCounter);
                     auto right = buildTransitions(node->_right(), stateCounter);
 
-                    addTransition(start, left.first, '\0'); // Transição epsilon para o início do ramo esquerdo
-                    addTransition(start, right.first, '\0'); // Transição epsilon para o início do ramo direito
-                    addTransition(left.second, end, '\0'); // Transição epsilon do fim do ramo esquerdo para o fim
-                    addTransition(right.second, end, '\0'); // Transição epsilon do fim do ramo direito para o fim
+                    addTransition(start, left.first, '\0');
+                    addTransition(start, right.first, '\0');
+                    addTransition(left.second, end, '\0');
+                    addTransition(right.second, end, '\0');
+
                     break;
                 }
             case '-':
@@ -160,10 +192,15 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
                 }
             default:
                 {
-                    buildTransitions(node->_left(), stateCounter);
-                    buildTransitions(node->_right(), stateCounter);
+                    //addTransition(start, end, c);
+
+                    auto left = buildTransitions(node->_left(), stateCounter);
+                    auto right = buildTransitions(node->_right(), stateCounter);
+
+                    addTransition(start, left.first, '\0');
+                    addTransition(left.second, right.first, '\0');
+                    addTransition(right.second, end, '\0');
                     
-                    addTransition(start, end, c);
                     break;
                 }
     }
