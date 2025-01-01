@@ -39,6 +39,11 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
         char c = regex[i];
 
         switch(c) {
+            case '[':
+                {
+                    operands.push(new SyntaxNode('['));
+                    break;
+                }
             case ']':
                 {
                     std::string charset;
@@ -66,7 +71,12 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
                     SyntaxNode * node = operands.top(); operands.pop();
                     operands.push(new SyntaxNode('$', node, nullptr));
                     break;
-                }                
+                }
+            case '(':
+                {
+                    operands.push(new SyntaxNode('('));
+                    break;
+                }
             case ')':
                 {
                     std::string charset;
@@ -94,7 +104,12 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
                     SyntaxNode * node = operands.top(); operands.pop();
                     operands.push(new SyntaxNode('?', node, nullptr));
                     break;
-                }                
+                }
+            case '{':
+                {
+                    operands.push(new SyntaxNode('{'));
+                    break;
+                }
             case '}':
                 {
                     std::string min, max;
@@ -123,13 +138,12 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
                     break;
                 }
         }
+    }
 
-        while(operands.size()>1) {
-            auto left = operands.top(); operands.pop();
-            auto right = operands.top(); operands.pop();
-            auto node = new SyntaxNode('.', left, right);
-            operands.push(node);
-        }
+    while(operands.size() > 1) {
+        SyntaxNode * right = operands.top(); operands.pop();
+        SyntaxNode * left = operands.top(); operands.pop();
+        operands.push(new SyntaxNode('.', left, right));
     }
 
     return operands.top();

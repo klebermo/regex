@@ -59,6 +59,8 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
     switch(c) {
             case '[':
                 {
+                    buildTransitions(node->_left(), stateCounter);
+                    buildTransitions(node->_right(), stateCounter);
                     break;
                 }
             case '.':
@@ -83,6 +85,8 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
                 }
             case '(':
                 {
+                    buildTransitions(node->_left(), stateCounter);
+                    buildTransitions(node->_right(), stateCounter);
                     break;
                 }
             case '*':
@@ -156,6 +160,9 @@ std::pair<int, int> Automato::buildTransitions(SyntaxNode * node, int stateCount
                 }
             default:
                 {
+                    buildTransitions(node->_left(), stateCounter);
+                    buildTransitions(node->_right(), stateCounter);
+                    
                     addTransition(start, end, c);
                     break;
                 }
