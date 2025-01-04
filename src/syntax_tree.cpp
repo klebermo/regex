@@ -41,7 +41,6 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
 
     for (size_t i = 0; i < regex.size(); i++) {
         char c = regex[i];
-        std::cout << "SyntaxTree | fromRegex | c: " << c << std::endl;
 
         switch(c) {
             case '[':
@@ -156,7 +155,6 @@ SyntaxNode * SyntaxTree::fromRegex(std::string regex) {
                 }
         }
     }
-    std::cout << "SyntaxTree | fromRegex | operands.size(): " << operands.size() << std::endl;
 
     while(operands.size() > 1) {
         SyntaxNode * right = operands.top(); operands.pop();

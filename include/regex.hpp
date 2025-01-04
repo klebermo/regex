@@ -13,9 +13,8 @@
 #define syntax_node_hpp
 
 class SyntaxNode {
+private:
     char value;
-    int minRepetitions;
-    int maxRepetitions;
     SyntaxNode * left;
     SyntaxNode * right;
 public:
@@ -23,14 +22,13 @@ public:
     SyntaxNode(char val);
     SyntaxNode(char val, SyntaxNode* child);
     SyntaxNode(char val, SyntaxNode* left, SyntaxNode* right);
-    SyntaxNode(char val, int minRep, int maxRep, SyntaxNode* child);
     ~SyntaxNode();
 
     char _value();
-    int _minRepetitions();
-    int _maxRepetitions();
     SyntaxNode * _left();
+    void _left(SyntaxNode * node);
     SyntaxNode * _right();
+    void _right(SyntaxNode * node);
 };
 
 #endif
@@ -89,24 +87,23 @@ public:
 #define AUTOMATO_HPP
 
 class Automato {
+private:
     SyntaxTree * syntaxTree;
     std::vector<Transition> transitions;
     int finalState;
 
     std::pair<int, int> buildTransitions(SyntaxNode * node, int stateCounter);
+    void addTransition(int from, int to, char value);    
 public:
     Automato(std::string regex);
     ~Automato();
 
-    std::unordered_set<int> epsilonClosure(const std::unordered_set<int>& states) const;
-    void addTransition(int from, int to, char value);
     void buildTransitions();
+    void printTransitions();
+    std::vector<Transition> getTransitions();
+    int getFinalState();
 
-    bool matches(std::string& input);
-    std::pair<int, int> find(const std::string& input);
-    std::vector<std::pair<int, int>> matchAll(const std::string& input);
-    void replace(std::string& input, std::string replacement);
-    bool isMatch(const std::string& input);    
+    std::unordered_set<int> epsilonClosure(const std::unordered_set<int>& states) const;
 };
 
 #endif
